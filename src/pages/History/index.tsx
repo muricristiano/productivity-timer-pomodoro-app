@@ -1,4 +1,4 @@
-import { HistoryContainer, HistoryList } from './styles'
+import { HistoryContainer, HistoryList, Status } from './styles'
 
 export function History() {
   return (
@@ -19,43 +19,57 @@ export function History() {
               <td>Task</td>
               <td>20 minutes</td>
               <td>10 days ago</td>
-              <td>Completed</td>
+              <td>
+                <Status statusColor="yellow">In progress</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>10 days ago</td>
-              <td>Completed</td>
+              <td>
+                <Status statusColor="green">Completed</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>10 days ago</td>
-              <td>Completed</td>
+              <td>
+                <Status statusColor="green">Interrupted</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>10 days ago</td>
-              <td>Completed</td>
+              <td>
+                <Status statusColor="green">Completed</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>10 days ago</td>
-              <td>Completed</td>
+              <td>
+                <Status statusColor="red">Interrupted</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>10 days ago</td>
-              <td>Completed</td>
+              <td>
+                <Status statusColor="green">Completed</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>10 days ago</td>
-              <td>Completed</td>
+              <td>
+                <Status statusColor="green">Completed</Status>
+              </td>
             </tr>
           </tbody>
         </table>
