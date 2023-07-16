@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { DefaultLayout } from './layouts/DefaultLayout'
 
 import { Home } from './pages/Home'
-import { History } from './pages/History/History'
+import { History } from './pages/History'
 
 export function Router() {
   return (
