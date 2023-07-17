@@ -18,6 +18,7 @@ export function Home() {
           <TaskInput
             type="text"
             id="task"
+            name="taskInputName"
             placeholder="What are you going to work on?"
             list="task-suggestions"
           />
