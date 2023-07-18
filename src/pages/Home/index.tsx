@@ -1,5 +1,8 @@
 import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as zod from 'zod'
+
 import {
   CountdownContainer,
   FormContainer,
@@ -10,20 +13,38 @@ import {
   TaskInput,
 } from './styles'
 
-export function Home() {
-  const { register, handleSubmit, watch } = useForm()
+const newActivityFormValidationSchemaZod = zod.object({
+  taskDescription: zod.string().min(1, 'Inform your activity'),
+  timeAmount: zod
+    .number()
+    .min(5, 'Inform a time between 5 and 90 minutes')
+    .max(90, 'Inform a time between 5 and 90 minutes'),
+})
 
-  function handleCreateNewCycle(data: object) {
+type NewActivityFormProps = zod.infer<typeof newActivityFormValidationSchemaZod>
+
+export function Home() {
+  const { register, handleSubmit, watch, reset } =
+    useForm<NewActivityFormProps>({
+      resolver: zodResolver(newActivityFormValidationSchemaZod),
+      defaultValues: {
+        taskDescription: '',
+        timeAmount: 0,
+      },
+    })
+
+  function handleCreateNewActivity(data: NewActivityFormProps) {
     console.log(data)
+    reset()
   }
 
   // Declarative const, explaining the condition is being watched.
-  const inputTaskDescriptionHasContent = watch('task-description')
+  const inputTaskDescriptionHasContent = watch('taskDescription')
 
   return (
     <HomeContainer>
       {/* A function => to => execute a function // This is like registering the function/event */}
-      <form onSubmit={handleSubmit(handleCreateNewCycle)}>
+      <form onSubmit={handleSubmit(handleCreateNewActivity)}>
         <FormContainer>
           <label htmlFor="task"> Activity: </label>
           <TaskInput
@@ -31,7 +52,7 @@ export function Home() {
             id="task"
             placeholder="What are you going to work on?"
             list="task-suggestions"
-            {...register('task-description')}
+            {...register('taskDescription')}
           />
 
           <datalist id="task-suggestions">
@@ -46,10 +67,10 @@ export function Home() {
             type="number"
             id="timeAmount"
             placeholder="00"
-            min={5}
+            min={1}
             max={90}
-            step={5}
-            {...register('minutesAmount', { valueAsNumber: true })}
+            // step={5}
+            {...register('timeAmount', { valueAsNumber: true })}
           />
 
           <span> minutes. </span>
