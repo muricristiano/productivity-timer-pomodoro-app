@@ -1,6 +1,7 @@
 import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
 import * as zod from 'zod'
 
 import {
@@ -23,7 +24,16 @@ const newActivityFormValidationSchemaZod = zod.object({
 
 type NewActivityFormProps = zod.infer<typeof newActivityFormValidationSchemaZod>
 
+interface Activity {
+  id: string
+  task: string
+  duration: number
+}
+
 export function Home() {
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [activeActivityID, setActiveActivityID] = useState<string | null>(null)
+
   const { register, handleSubmit, watch, reset } =
     useForm<NewActivityFormProps>({
       resolver: zodResolver(newActivityFormValidationSchemaZod),
@@ -34,9 +44,20 @@ export function Home() {
     })
 
   function handleCreateNewActivity(data: NewActivityFormProps) {
-    console.log(data)
+    const newActivity: Activity = {
+      id: String(new Date().getTime()),
+      task: data.taskDescription,
+      duration: data.timeAmount,
+    }
+
+    setActivities((state) => [...state, newActivity])
+    setActiveActivityID(newActivity.id)
     reset()
   }
+
+  const activeActivity = activities.find((item) => item.id === activeActivityID)
+
+  console.log(activeActivity)
 
   // Declarative const, explaining the condition is being watched.
   const inputTaskDescriptionHasContent = watch('taskDescription')
