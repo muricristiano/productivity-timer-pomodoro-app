@@ -33,6 +33,7 @@ interface Activity {
 export function Home() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [activeActivityID, setActiveActivityID] = useState<string | null>(null)
+  const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
 
   const { register, handleSubmit, watch, reset } =
     useForm<NewActivityFormProps>({
@@ -57,7 +58,18 @@ export function Home() {
 
   const activeActivity = activities.find((item) => item.id === activeActivityID)
 
-  console.log(activeActivity)
+  // First, check if there any active activity, then convert the duration to seconds
+  const totalActivitySeconds = activeActivity ? activeActivity.duration * 60 : 0
+
+  const currentSecondsRemaining = activeActivity
+    ? totalActivitySeconds - secondsTimerPassed
+    : 0
+
+  const minutesAmount = Math.floor(currentSecondsRemaining / 60)
+  const secondsAmount = currentSecondsRemaining % 60
+
+  const minutes = String(minutesAmount).padStart(2, '0')
+  const seconds = String(secondsAmount).padStart(2, '0')
 
   // Declarative const, explaining the condition is being watched.
   const inputTaskDescriptionHasContent = watch('taskDescription')
@@ -98,11 +110,11 @@ export function Home() {
         </FormContainer>
 
         <CountdownContainer>
-          <span>0</span>
-          <span>0</span>
+          <span>{minutes[0]}</span>
+          <span>{minutes[1]}</span>
           <Separator>:</Separator>
-          <span>0</span>
-          <span>0</span>
+          <span>{seconds[0]}</span>
+          <span>{seconds[1]}</span>
         </CountdownContainer>
 
         <StartCountdownButton
