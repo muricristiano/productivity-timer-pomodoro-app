@@ -1,8 +1,9 @@
 import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as zod from 'zod'
+import { differenceInSeconds } from 'date-fns'
 
 import {
   CountdownContainer,
@@ -28,6 +29,7 @@ interface Activity {
   id: string
   task: string
   duration: number
+  startDate: Date
 }
 
 export function Home() {
@@ -44,19 +46,30 @@ export function Home() {
       },
     })
 
+  const activeActivity = activities.find((item) => item.id === activeActivityID)
+
+  useEffect(() => {
+    if (activeActivity) {
+      setInterval(() => {
+        setSecondsTimerPassed(
+          differenceInSeconds(new Date(), activeActivity.startDate),
+        )
+      }, 1000)
+    }
+  }, [activeActivity])
+
   function handleCreateNewActivity(data: NewActivityFormProps) {
     const newActivity: Activity = {
       id: String(new Date().getTime()),
       task: data.taskDescription,
       duration: data.timeAmount,
+      startDate: new Date(),
     }
 
     setActivities((state) => [...state, newActivity])
     setActiveActivityID(newActivity.id)
     reset()
   }
-
-  const activeActivity = activities.find((item) => item.id === activeActivityID)
 
   // First, check if there any active activity, then convert the duration to seconds
   const totalActivitySeconds = activeActivity ? activeActivity.duration * 60 : 0
