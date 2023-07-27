@@ -1,28 +1,16 @@
 import { HandPalm, Play } from 'phosphor-react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
-import * as zod from 'zod'
+
+import { createContext, useEffect, useState } from 'react'
 import { differenceInSeconds } from 'date-fns'
+
+import { NewActivityForm } from './components/NewActivityForm'
+import { Countdown } from './components/Countdown'
 
 import {
   HomeContainer,
   StartCountdownButton,
   StopCountdownButton,
 } from './styles'
-
-import { NewActivityForm } from './components/NewActivityForm'
-import { Countdown } from './components/Countdown'
-
-const newActivityFormValidationSchemaZod = zod.object({
-  taskDescription: zod.string().min(1, 'Inform your activity'),
-  timeAmount: zod
-    .number()
-    .min(1, 'Inform a time between 1 and 90 minutes')
-    .max(90, 'Inform a time between 1 and 90 minutes'),
-})
-
-type NewActivityFormProps = zod.infer<typeof newActivityFormValidationSchemaZod>
 
 interface Activity {
   id: string
@@ -33,89 +21,62 @@ interface Activity {
   finishedDate?: Date
 }
 
+interface ActivitiesContextType {
+  activeActivity: Activity | undefined
+  activeActivityID: string | null
+  activeActivityName: string | null
+  markCurrentActivityAsFinished: () => void
+  resetCurrentActivity: () => void
+}
+
+export const ActivitiesContext = createContext({} as ActivitiesContextType)
+
 export function Home() {
   const [activities, setActivities] = useState<Activity[]>([])
   const [activeActivityID, setActiveActivityID] = useState<string | null>(null)
-  const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
 
   // Page Title = Duration + Activity Name
   const [activeActivityName, setActiveActivityName] = useState<string | null>(
     null,
   )
 
-  const { register, handleSubmit, watch, reset } =
-    useForm<NewActivityFormProps>({
-      resolver: zodResolver(newActivityFormValidationSchemaZod),
-      defaultValues: {
-        taskDescription: '',
-        timeAmount: 0,
-      },
-    })
-
   const activeActivity = activities.find((item) => item.id === activeActivityID)
+
   const activeTaskName = activities.find(
     (item) => item.task === activeActivityName,
   )
 
-  // First, check if there any active activity, then convert the duration to seconds
-  const totalActivitySeconds = activeActivity ? activeActivity.duration * 60 : 0
-
-  useEffect(() => {
-    let interval: number
-
-    if (activeActivity) {
-      interval = setInterval(() => {
-        const differenceTime = differenceInSeconds(
-          new Date(),
-          activeActivity.startDate,
-        )
-
-        if (differenceTime >= totalActivitySeconds) {
-          setActivities((state) =>
-            state.map((item) => {
-              if (item.id === activeActivityID) {
-                return { ...item, finishedDate: new Date() }
-              } else {
-                return item
-              }
-            }),
-          )
-
-          setSecondsTimerPassed(totalActivitySeconds)
-          clearInterval(interval)
-          document.title = `Success! - ${activeActivityName}`
-          setActiveActivityID(null) // Clear action
-        } else {
-          setSecondsTimerPassed(differenceTime)
-        }
-      }, 1000)
-    }
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [
-    activeActivity,
-    totalActivitySeconds,
-    activeActivityID,
-    activeActivityName,
-  ])
-
-  function handleCreateNewActivity(data: NewActivityFormProps) {
-    const newActivity: Activity = {
-      id: String(new Date().getTime()),
-      task: data.taskDescription,
-      duration: data.timeAmount,
-      startDate: new Date(),
-    }
-
-    setActivities((state) => [...state, newActivity])
-    setActiveActivityID(newActivity.id)
-    setActiveActivityName(newActivity.task)
-    setSecondsTimerPassed(0)
-
-    reset()
+  function resetCurrentActivity() {
+    setActiveActivityID(null) // Clear action
   }
+
+  function markCurrentActivityAsFinished() {
+    setActivities((state) =>
+      state.map((item) => {
+        if (item.id === activeActivityID) {
+          return { ...item, finishedDate: new Date() }
+        } else {
+          return item
+        }
+      }),
+    )
+  }
+
+  // function handleCreateNewActivity(data: NewActivityFormProps) {
+  //   const newActivity: Activity = {
+  //     id: String(new Date().getTime()),
+  //     task: data.taskDescription,
+  //     duration: data.timeAmount,
+  //     startDate: new Date(),
+  //   }
+
+  //   setActivities((state) => [...state, newActivity])
+  //   setActiveActivityID(newActivity.id)
+  //   setActiveActivityName(newActivity.task)
+  //   setSecondsTimerPassed(0)
+
+  //   reset()
+  // }
 
   function handleInterruptActivity() {
     setActivities((state) =>
@@ -132,34 +93,26 @@ export function Home() {
     document.title = 'Pomodoro - Productivity Timer'
   }
 
-  const currentSecondsRemaining = activeActivity
-    ? totalActivitySeconds - secondsTimerPassed
-    : 0
-
-  const minutesAmount = Math.floor(currentSecondsRemaining / 60)
-  const secondsAmount = currentSecondsRemaining % 60
-
-  const minutes = String(minutesAmount).padStart(2, '0')
-  const seconds = String(secondsAmount).padStart(2, '0')
-
-  // Page Title: Duration + Task
-
-  useEffect(() => {
-    if (activeActivity) {
-      document.title = `${minutes}:${seconds} 
-    - ${activeTaskName?.task}`
-    }
-  }, [minutes, seconds, activeActivity, activeTaskName])
-
   // Declarative const, explaining the condition is being watched.
-  const inputTaskDescriptionHasContent = watch('taskDescription')
+
+  // const inputTaskDescriptionHasContent = watch('taskDescription')
 
   return (
     <HomeContainer>
       {/* A function => to => execute a function // This is like registering the function/event */}
-      <form onSubmit={handleSubmit(handleCreateNewActivity)}>
-        <NewActivityForm />
-        <Countdown />
+      <form /* onSubmit={handleSubmit(handleCreateNewActivity)} */>
+        <ActivitiesContext.Provider
+          value={{
+            activeActivity,
+            activeActivityID,
+            activeActivityName,
+            markCurrentActivityAsFinished,
+            resetCurrentActivity,
+          }}
+        >
+          {/* <NewActivityForm /> */}
+          <Countdown />
+        </ActivitiesContext.Provider>
 
         {activeActivity ? (
           <StopCountdownButton type="button" onClick={handleInterruptActivity}>
@@ -168,7 +121,7 @@ export function Home() {
           </StopCountdownButton>
         ) : (
           <StartCountdownButton
-            disabled={!inputTaskDescriptionHasContent}
+            /* disabled={!inputTaskDescriptionHasContent} */
             type="submit"
           >
             <Play size={24} />
