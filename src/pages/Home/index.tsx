@@ -37,6 +37,11 @@ export function Home() {
   const [activeActivityID, setActiveActivityID] = useState<string | null>(null)
   const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
 
+  // Page Title = Duration + Activity Name
+  const [activeActivityName, setActiveActivityName] = useState<string | null>(
+    null,
+  )
+
   const { register, handleSubmit, watch, reset } =
     useForm<NewActivityFormProps>({
       resolver: zodResolver(newActivityFormValidationSchemaZod),
@@ -47,14 +52,23 @@ export function Home() {
     })
 
   const activeActivity = activities.find((item) => item.id === activeActivityID)
+  const activeTaskName = activities.find(
+    (item) => item.task === activeActivityName,
+  )
 
   useEffect(() => {
+    let interval: number
+
     if (activeActivity) {
-      setInterval(() => {
+      interval = setInterval(() => {
         setSecondsTimerPassed(
           differenceInSeconds(new Date(), activeActivity.startDate),
         )
       }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval)
     }
   }, [activeActivity])
 
@@ -68,6 +82,9 @@ export function Home() {
 
     setActivities((state) => [...state, newActivity])
     setActiveActivityID(newActivity.id)
+    setActiveActivityName(newActivity.task)
+    setSecondsTimerPassed(0)
+
     reset()
   }
 
@@ -83,6 +100,15 @@ export function Home() {
 
   const minutes = String(minutesAmount).padStart(2, '0')
   const seconds = String(secondsAmount).padStart(2, '0')
+
+  // Page Title: Duration + Task
+
+  useEffect(() => {
+    if (activeActivity) {
+      document.title = `${minutes}:${seconds} 
+    - ${activeTaskName?.task}`
+    }
+  }, [minutes, seconds, activeActivity, activeTaskName])
 
   // Declarative const, explaining the condition is being watched.
   const inputTaskDescriptionHasContent = watch('taskDescription')
