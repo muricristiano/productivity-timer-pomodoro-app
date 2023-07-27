@@ -16,6 +16,9 @@ import {
   TaskInput,
 } from './styles'
 
+import { NewActivityForm } from './components/NewActivityForm'
+import { Countdown } from './components/Countdown'
+
 const newActivityFormValidationSchemaZod = zod.object({
   taskDescription: zod.string().min(1, 'Inform your activity'),
   timeAmount: zod
@@ -160,46 +163,8 @@ export function Home() {
     <HomeContainer>
       {/* A function => to => execute a function // This is like registering the function/event */}
       <form onSubmit={handleSubmit(handleCreateNewActivity)}>
-        <FormContainer>
-          <label htmlFor="task"> Activity: </label>
-          <TaskInput
-            type="text"
-            id="task"
-            placeholder="What are you going to work on?"
-            list="task-suggestions"
-            disabled={!!activeActivity}
-            {...register('taskDescription')}
-          />
-
-          <datalist id="task-suggestions">
-            <option value="Study" />
-            <option value="Working on projects" />
-            <option value="Research" />
-            <option value="Practice Video Editing" />
-          </datalist>
-
-          <label htmlFor="timeAmount"> for </label>
-          <MinutesAmountInput
-            type="number"
-            id="timeAmount"
-            placeholder="00"
-            min={1}
-            max={90}
-            disabled={!!activeActivity}
-            // step={5}
-            {...register('timeAmount', { valueAsNumber: true })}
-          />
-
-          <span> minutes. </span>
-        </FormContainer>
-
-        <CountdownContainer>
-          <span>{minutes[0]}</span>
-          <span>{minutes[1]}</span>
-          <Separator>:</Separator>
-          <span>{seconds[0]}</span>
-          <span>{seconds[1]}</span>
-        </CountdownContainer>
+        <NewActivityForm />
+        <Countdown />
 
         {activeActivity ? (
           <StopCountdownButton type="button" onClick={handleInterruptActivity}>
