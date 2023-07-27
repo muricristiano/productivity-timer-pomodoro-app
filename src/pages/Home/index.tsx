@@ -20,8 +20,8 @@ const newActivityFormValidationSchemaZod = zod.object({
   taskDescription: zod.string().min(1, 'Inform your activity'),
   timeAmount: zod
     .number()
-    .min(5, 'Inform a time between 5 and 90 minutes')
-    .max(90, 'Inform a time between 5 and 90 minutes'),
+    .min(1, 'Inform a time between 1 and 90 minutes')
+    .max(90, 'Inform a time between 1 and 90 minutes'),
 })
 
 type NewActivityFormProps = zod.infer<typeof newActivityFormValidationSchemaZod>
@@ -32,6 +32,7 @@ interface Activity {
   duration: number
   startDate: Date
   interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
@@ -58,21 +59,49 @@ export function Home() {
     (item) => item.task === activeActivityName,
   )
 
+  // First, check if there any active activity, then convert the duration to seconds
+  const totalActivitySeconds = activeActivity ? activeActivity.duration * 60 : 0
+
   useEffect(() => {
     let interval: number
 
     if (activeActivity) {
       interval = setInterval(() => {
-        setSecondsTimerPassed(
-          differenceInSeconds(new Date(), activeActivity.startDate),
+        const differenceTime = differenceInSeconds(
+          new Date(),
+          activeActivity.startDate,
         )
+
+        if (differenceTime >= totalActivitySeconds) {
+          setActivities((state) =>
+            state.map((item) => {
+              if (item.id === activeActivityID) {
+                return { ...item, finishedDate: new Date() }
+              } else {
+                return item
+              }
+            }),
+          )
+
+          setSecondsTimerPassed(totalActivitySeconds)
+          clearInterval(interval)
+          document.title = `Success! - ${activeActivityName}`
+          setActiveActivityID(null) // Clear action
+        } else {
+          setSecondsTimerPassed(differenceTime)
+        }
       }, 1000)
     }
 
     return () => {
       clearInterval(interval)
     }
-  }, [activeActivity])
+  }, [
+    activeActivity,
+    totalActivitySeconds,
+    activeActivityID,
+    activeActivityName,
+  ])
 
   function handleCreateNewActivity(data: NewActivityFormProps) {
     const newActivity: Activity = {
@@ -91,8 +120,8 @@ export function Home() {
   }
 
   function handleInterruptActivity() {
-    setActivities(
-      activities.map((item) => {
+    setActivities((state) =>
+      state.map((item) => {
         if (item.id === activeActivityID) {
           return { ...item, interruptedDate: new Date() }
         } else {
@@ -104,9 +133,6 @@ export function Home() {
     setActiveActivityID(null) // Clear action
     document.title = 'Pomodoro - Productivity Timer'
   }
-
-  // First, check if there any active activity, then convert the duration to seconds
-  const totalActivitySeconds = activeActivity ? activeActivity.duration * 60 : 0
 
   const currentSecondsRemaining = activeActivity
     ? totalActivitySeconds - secondsTimerPassed
