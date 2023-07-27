@@ -1,4 +1,4 @@
-import { Play } from 'phosphor-react'
+import { HandPalm, Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
@@ -12,6 +12,7 @@ import {
   MinutesAmountInput,
   Separator,
   StartCountdownButton,
+  StopCountdownButton,
   TaskInput,
 } from './styles'
 
@@ -30,6 +31,7 @@ interface Activity {
   task: string
   duration: number
   startDate: Date
+  interruptedDate?: Date
 }
 
 export function Home() {
@@ -88,6 +90,21 @@ export function Home() {
     reset()
   }
 
+  function handleInterruptActivity() {
+    setActivities(
+      activities.map((item) => {
+        if (item.id === activeActivityID) {
+          return { ...item, interruptedDate: new Date() }
+        } else {
+          return item
+        }
+      }),
+    )
+
+    setActiveActivityID(null) // Clear action
+    document.title = 'Pomodoro - Productivity Timer'
+  }
+
   // First, check if there any active activity, then convert the duration to seconds
   const totalActivitySeconds = activeActivity ? activeActivity.duration * 60 : 0
 
@@ -124,6 +141,7 @@ export function Home() {
             id="task"
             placeholder="What are you going to work on?"
             list="task-suggestions"
+            disabled={!!activeActivity}
             {...register('taskDescription')}
           />
 
@@ -141,6 +159,7 @@ export function Home() {
             placeholder="00"
             min={1}
             max={90}
+            disabled={!!activeActivity}
             // step={5}
             {...register('timeAmount', { valueAsNumber: true })}
           />
@@ -156,13 +175,20 @@ export function Home() {
           <span>{seconds[1]}</span>
         </CountdownContainer>
 
-        <StartCountdownButton
-          disabled={!inputTaskDescriptionHasContent}
-          type="submit"
-        >
-          <Play size={24} />
-          Start
-        </StartCountdownButton>
+        {activeActivity ? (
+          <StopCountdownButton type="button" onClick={handleInterruptActivity}>
+            <HandPalm size={24} />
+            Stop
+          </StopCountdownButton>
+        ) : (
+          <StartCountdownButton
+            disabled={!inputTaskDescriptionHasContent}
+            type="submit"
+          >
+            <Play size={24} />
+            Start
+          </StartCountdownButton>
+        )}
       </form>
     </HomeContainer>
   )
