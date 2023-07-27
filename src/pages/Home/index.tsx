@@ -6,14 +6,9 @@ import * as zod from 'zod'
 import { differenceInSeconds } from 'date-fns'
 
 import {
-  CountdownContainer,
-  FormContainer,
   HomeContainer,
-  MinutesAmountInput,
-  Separator,
   StartCountdownButton,
   StopCountdownButton,
-  TaskInput,
 } from './styles'
 
 import { NewActivityForm } from './components/NewActivityForm'
