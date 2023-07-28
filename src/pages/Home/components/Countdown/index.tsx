@@ -10,9 +10,9 @@ export function Countdown() {
     activeActivityName,
     markCurrentActivityAsFinished,
     resetCurrentActivity,
+    secondsTimerPassed,
+    updateSecondsTimerPassed,
   } = useContext(ActivitiesContext)
-
-  const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
 
   // First, check if there any active activity, then convert the duration to seconds
   const totalActivitySeconds = activeActivity ? activeActivity.duration * 60 : 0
@@ -47,12 +47,12 @@ export function Countdown() {
 
         if (differenceTime >= totalActivitySeconds) {
           markCurrentActivityAsFinished()
-          setSecondsTimerPassed(totalActivitySeconds)
+          updateSecondsTimerPassed(totalActivitySeconds)
           clearInterval(interval)
           document.title = `Success! - ${activeActivityName}`
           resetCurrentActivity()
         } else {
-          setSecondsTimerPassed(differenceTime)
+          updateSecondsTimerPassed(differenceTime)
         }
       }, 1000)
     }
@@ -67,6 +67,7 @@ export function Countdown() {
     activeActivityName,
     markCurrentActivityAsFinished,
     resetCurrentActivity,
+    updateSecondsTimerPassed,
   ])
 
   return (

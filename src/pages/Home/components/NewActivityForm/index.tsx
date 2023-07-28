@@ -1,27 +1,11 @@
 import { FormContainer, MinutesAmountInput, TaskInput } from './styles'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as zod from 'zod'
-
-const newActivityFormValidationSchemaZod = zod.object({
-  taskDescription: zod.string().min(1, 'Inform your activity'),
-  timeAmount: zod
-    .number()
-    .min(1, 'Inform a time between 1 and 90 minutes')
-    .max(90, 'Inform a time between 1 and 90 minutes'),
-})
-
-type NewActivityFormProps = zod.infer<typeof newActivityFormValidationSchemaZod>
+import { ActivitiesContext } from '../..'
+import { useContext } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 export function NewActivityForm() {
-  const { register, handleSubmit, watch, reset } =
-    useForm<NewActivityFormProps>({
-      resolver: zodResolver(newActivityFormValidationSchemaZod),
-      defaultValues: {
-        taskDescription: '',
-        timeAmount: 0,
-      },
-    })
+  const { activeActivity } = useContext(ActivitiesContext)
+  const { register } = useFormContext()
 
   return (
     <FormContainer>

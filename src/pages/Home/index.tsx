@@ -1,8 +1,8 @@
 import { HandPalm, Play } from 'phosphor-react'
-
-import { createContext, useEffect, useState } from 'react'
-import { differenceInSeconds } from 'date-fns'
-
+import { FormProvider, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as zod from 'zod'
+import { createContext, useState } from 'react'
 import { NewActivityForm } from './components/NewActivityForm'
 import { Countdown } from './components/Countdown'
 
@@ -25,11 +25,23 @@ interface ActivitiesContextType {
   activeActivity: Activity | undefined
   activeActivityID: string | null
   activeActivityName: string | null
+  secondsTimerPassed: number
   markCurrentActivityAsFinished: () => void
   resetCurrentActivity: () => void
+  updateSecondsTimerPassed: (seconds: number) => void
 }
 
 export const ActivitiesContext = createContext({} as ActivitiesContextType)
+
+const newActivityFormValidationSchemaZod = zod.object({
+  taskDescription: zod.string().min(1, 'Inform your activity'),
+  timeAmount: zod
+    .number()
+    .min(1, 'Inform a time between 1 and 90 minutes')
+    .max(90, 'Inform a time between 1 and 90 minutes'),
+})
+
+type NewActivityFormProps = zod.infer<typeof newActivityFormValidationSchemaZod>
 
 export function Home() {
   const [activities, setActivities] = useState<Activity[]>([])
@@ -40,11 +52,23 @@ export function Home() {
     null,
   )
 
+  const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
+
+  const newActivityForm = useForm<NewActivityFormProps>({
+    resolver: zodResolver(newActivityFormValidationSchemaZod),
+    defaultValues: {
+      taskDescription: '',
+      timeAmount: 0,
+    },
+  })
+
+  const { handleSubmit, watch, reset } = newActivityForm
+
   const activeActivity = activities.find((item) => item.id === activeActivityID)
 
-  const activeTaskName = activities.find(
+  /*   const activeTaskName = activities.find(
     (item) => item.task === activeActivityName,
-  )
+  ) */
 
   function resetCurrentActivity() {
     setActiveActivityID(null) // Clear action
@@ -62,21 +86,21 @@ export function Home() {
     )
   }
 
-  // function handleCreateNewActivity(data: NewActivityFormProps) {
-  //   const newActivity: Activity = {
-  //     id: String(new Date().getTime()),
-  //     task: data.taskDescription,
-  //     duration: data.timeAmount,
-  //     startDate: new Date(),
-  //   }
+  function handleCreateNewActivity(data: NewActivityFormProps) {
+    const newActivity: Activity = {
+      id: String(new Date().getTime()),
+      task: data.taskDescription,
+      duration: data.timeAmount,
+      startDate: new Date(),
+    }
 
-  //   setActivities((state) => [...state, newActivity])
-  //   setActiveActivityID(newActivity.id)
-  //   setActiveActivityName(newActivity.task)
-  //   setSecondsTimerPassed(0)
+    setActivities((state) => [...state, newActivity])
+    setActiveActivityID(newActivity.id)
+    setActiveActivityName(newActivity.task)
+    setSecondsTimerPassed(0)
 
-  //   reset()
-  // }
+    reset()
+  }
 
   function handleInterruptActivity() {
     setActivities((state) =>
@@ -95,12 +119,16 @@ export function Home() {
 
   // Declarative const, explaining the condition is being watched.
 
-  // const inputTaskDescriptionHasContent = watch('taskDescription')
+  const inputTaskDescriptionHasContent = watch('taskDescription')
+
+  function updateSecondsTimerPassed(seconds: number) {
+    setSecondsTimerPassed(seconds)
+  }
 
   return (
     <HomeContainer>
       {/* A function => to => execute a function // This is like registering the function/event */}
-      <form /* onSubmit={handleSubmit(handleCreateNewActivity)} */>
+      <form onSubmit={handleSubmit(handleCreateNewActivity)}>
         <ActivitiesContext.Provider
           value={{
             activeActivity,
@@ -108,9 +136,13 @@ export function Home() {
             activeActivityName,
             markCurrentActivityAsFinished,
             resetCurrentActivity,
+            secondsTimerPassed,
+            updateSecondsTimerPassed,
           }}
         >
-          {/* <NewActivityForm /> */}
+          <FormProvider {...newActivityForm}>
+            <NewActivityForm />
+          </FormProvider>
           <Countdown />
         </ActivitiesContext.Provider>
 
@@ -121,7 +153,7 @@ export function Home() {
           </StopCountdownButton>
         ) : (
           <StartCountdownButton
-            /* disabled={!inputTaskDescriptionHasContent} */
+            disabled={!inputTaskDescriptionHasContent}
             type="submit"
           >
             <Play size={24} />
