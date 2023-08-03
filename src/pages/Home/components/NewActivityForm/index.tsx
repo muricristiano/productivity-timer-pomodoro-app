@@ -1,7 +1,7 @@
 import { FormContainer, MinutesAmountInput, TaskInput } from './styles'
-import { ActivitiesContext } from '../..'
 import { useContext } from 'react'
 import { useFormContext } from 'react-hook-form'
+import { ActivitiesContext } from '../../../../contexts/ActivitiesContext'
 
 export function NewActivityForm() {
   const { activeActivity } = useContext(ActivitiesContext)
