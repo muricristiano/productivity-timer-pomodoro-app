@@ -1,9 +1,13 @@
 import { useContext } from 'react'
+import { formatDistanceToNow } from 'date-fns'
 import { HistoryContainer, HistoryList, Status } from './styles'
 import { ActivitiesContext } from '../../contexts/ActivitiesContext'
 
 export function History() {
   const { activities } = useContext(ActivitiesContext)
+  const reversedActivitiesList = [...activities].reverse()
+  const recentActivitiesOrderList = reversedActivitiesList
+
   return (
     <HistoryContainer>
       <h1>History</h1>
@@ -18,12 +22,16 @@ export function History() {
             </tr>
           </thead>
           <tbody>
-            {activities.map((activity) => {
+            {recentActivitiesOrderList.map((activity) => {
               return (
                 <tr key={activity.id}>
                   <td>{activity.task}</td>
-                  <td>{activity.duration}</td>
-                  <td>{activity.startDate.toISOString()}</td>
+                  <td>{activity.duration} minutes</td>
+                  <td>
+                    {formatDistanceToNow(activity.startDate, {
+                      addSuffix: true,
+                    })}
+                  </td>
                   <td>
                     {activity.finishedDate && (
                       <Status statusColor="green">Completed</Status>

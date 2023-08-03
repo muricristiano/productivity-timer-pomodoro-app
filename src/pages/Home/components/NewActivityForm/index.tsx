@@ -20,10 +20,10 @@ export function NewActivityForm() {
       />
 
       <datalist id="task-suggestions">
+        <option value="Work" />
         <option value="Study" />
-        <option value="Working on projects" />
         <option value="Research" />
-        <option value="Practice Video Editing" />
+        <option value="Plan" />
       </datalist>
 
       <label htmlFor="timeAmount"> for </label>
