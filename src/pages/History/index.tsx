@@ -7,9 +7,6 @@ export function History() {
   return (
     <HistoryContainer>
       <h1>History</h1>
-
-      <pre>{JSON.stringify(activities, null, 2)}</pre>
-
       <HistoryList>
         <table>
           <thead>
@@ -21,62 +18,26 @@ export function History() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>10 days ago</td>
-              <td>
-                <Status statusColor="yellow">In progress</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>10 days ago</td>
-              <td>
-                <Status statusColor="green">Completed</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>10 days ago</td>
-              <td>
-                <Status statusColor="green">Interrupted</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>10 days ago</td>
-              <td>
-                <Status statusColor="green">Completed</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>10 days ago</td>
-              <td>
-                <Status statusColor="red">Interrupted</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>10 days ago</td>
-              <td>
-                <Status statusColor="green">Completed</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>10 days ago</td>
-              <td>
-                <Status statusColor="green">Completed</Status>
-              </td>
-            </tr>
+            {activities.map((activity) => {
+              return (
+                <tr key={activity.id}>
+                  <td>{activity.task}</td>
+                  <td>{activity.duration}</td>
+                  <td>{activity.startDate.toISOString()}</td>
+                  <td>
+                    {activity.finishedDate && (
+                      <Status statusColor="green">Completed</Status>
+                    )}
+                    {activity.interruptedDate && (
+                      <Status statusColor="red">Interrupted</Status>
+                    )}
+                    {!activity.finishedDate && !activity.interruptedDate && (
+                      <Status statusColor="yellow">In progress</Status>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </HistoryList>
