@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useState } from 'react'
+import { ReactNode, createContext, useReducer, useState } from 'react'
 
 interface CreateActivityData {
   taskDescription: string
@@ -36,7 +36,14 @@ interface CyclesContextProviderProps {
 export function ActivitiesContextProvider({
   children,
 }: CyclesContextProviderProps) {
-  const [activities, setActivities] = useState<Activity[]>([])
+  const [activities, dispatch] = useReducer(
+    (state: Activity[], action: any) => {
+      console.log(activities)
+      console.log(state)
+      return state
+    },
+    [],
+  )
 
   const [activeActivityID, setActiveActivityID] = useState<string | null>(null)
 
@@ -57,7 +64,7 @@ export function ActivitiesContextProvider({
   }
 
   function markCurrentActivityAsFinished() {
-    setActivities((state) =>
+    /* setActivities((state) =>
       state.map((item) => {
         if (item.id === activeActivityID) {
           return { ...item, finishedDate: new Date() }
@@ -65,7 +72,7 @@ export function ActivitiesContextProvider({
           return item
         }
       }),
-    )
+    ) */
   }
 
   function updateSecondsTimerPassed(seconds: number) {
@@ -73,7 +80,7 @@ export function ActivitiesContextProvider({
   }
 
   function createNewActivity(data: CreateActivityData) {
-    const newActivity: Activity = {
+    /*     const newActivity: Activity = {
       id: String(new Date().getTime()),
       task: data.taskDescription,
       duration: data.timeAmount,
@@ -83,11 +90,11 @@ export function ActivitiesContextProvider({
     setActivities((state) => [...state, newActivity])
     setActiveActivityID(newActivity.id)
     setActiveActivityName(newActivity.task)
-    setSecondsTimerPassed(0)
+    setSecondsTimerPassed(0) */
   }
 
   function interruptCurrentActivity() {
-    setActivities((state) =>
+    /*     setActivities((state) =>
       state.map((item) => {
         if (item.id === activeActivityID) {
           return { ...item, interruptedDate: new Date() }
@@ -98,7 +105,7 @@ export function ActivitiesContextProvider({
     )
 
     setActiveActivityID(null) // Clear action
-    document.title = 'Pomodoro - Productivity Timer'
+    document.title = 'Pomodoro - Productivity Timer' */
   }
 
   return (
