@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useReducer, useState } from 'react'
+import { ReactNode, createContext, useState, useReducer } from 'react'
 
 interface CreateActivityData {
   taskDescription: string
@@ -29,17 +29,19 @@ interface ActivitiesContextType {
 
 export const ActivitiesContext = createContext({} as ActivitiesContextType)
 
-interface CyclesContextProviderProps {
+interface ActivitiesContextProviderProps {
   children: ReactNode
 }
 
 export function ActivitiesContextProvider({
   children,
-}: CyclesContextProviderProps) {
+}: ActivitiesContextProviderProps) {
   const [activities, dispatch] = useReducer(
     (state: Activity[], action: any) => {
-      console.log(activities)
-      console.log(state)
+      if (action.type === 'ADD_NEW_ACTIVITY') {
+        return [...state, action.payload.newActivity]
+      }
+
       return state
     },
     [],
@@ -64,6 +66,13 @@ export function ActivitiesContextProvider({
   }
 
   function markCurrentActivityAsFinished() {
+    dispatch({
+      type: 'MARK_CURRENT_ACTIVITY_AS_FINISHED',
+      payload: {
+        activeActivityID,
+      },
+    })
+
     /* setActivities((state) =>
       state.map((item) => {
         if (item.id === activeActivityID) {
@@ -80,20 +89,34 @@ export function ActivitiesContextProvider({
   }
 
   function createNewActivity(data: CreateActivityData) {
-    /*     const newActivity: Activity = {
+    const newActivity: Activity = {
       id: String(new Date().getTime()),
       task: data.taskDescription,
       duration: data.timeAmount,
       startDate: new Date(),
     }
 
-    setActivities((state) => [...state, newActivity])
+    dispatch({
+      type: 'ADD_NEW_ACTIVITY',
+      payload: {
+        newActivity,
+      },
+    })
+
+    // setActivities((state) => [...state, newActivity])
     setActiveActivityID(newActivity.id)
     setActiveActivityName(newActivity.task)
-    setSecondsTimerPassed(0) */
+    setSecondsTimerPassed(0)
   }
 
   function interruptCurrentActivity() {
+    dispatch({
+      type: 'INTERRUPT_CURRENT_ACTIVITY',
+      payload: {
+        activeActivityID,
+      },
+    })
+
     /*     setActivities((state) =>
       state.map((item) => {
         if (item.id === activeActivityID) {
@@ -103,9 +126,10 @@ export function ActivitiesContextProvider({
         }
       }),
     )
+    */
 
     setActiveActivityID(null) // Clear action
-    document.title = 'Pomodoro - Productivity Timer' */
+    document.title = 'Pomodoro - Productivity Timer'
   }
 
   return (

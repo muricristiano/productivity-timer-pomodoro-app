@@ -6,7 +6,7 @@ import { ActivitiesContext } from '../../contexts/ActivitiesContext'
 export function History() {
   const { activities } = useContext(ActivitiesContext)
   const reversedActivitiesList = [...activities].reverse()
-  const recentActivitiesOrderList = reversedActivitiesList
+  const recentActivitiesOrderedList = reversedActivitiesList
 
   return (
     <HistoryContainer>
@@ -22,7 +22,7 @@ export function History() {
             </tr>
           </thead>
           <tbody>
-            {recentActivitiesOrderList.map((activity) => {
+            {recentActivitiesOrderedList.map((activity) => {
               return (
                 <tr key={activity.id}>
                   <td>{activity.task}</td>
