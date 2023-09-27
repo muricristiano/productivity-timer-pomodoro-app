@@ -21,7 +21,6 @@ interface ActivitiesContextType {
   activeActivityName: string | null
   secondsTimerPassed: number
   markCurrentActivityAsFinished: () => void
-  resetCurrentActivity: () => void
   updateSecondsTimerPassed: (seconds: number) => void
   createNewActivity: (data: CreateActivityData) => void
   interruptCurrentActivity: () => void
@@ -43,29 +42,43 @@ export function ActivitiesContextProvider({
 }: ActivitiesContextProviderProps) {
   const [activitiesState, dispatch] = useReducer(
     (state: activitiesReducer, action: any) => {
-      if (action.type === 'ADD_NEW_ACTIVITY') {
-        return {
-          ...state,
-          activities: [...state.activities, action.payload.newActivity],
-          activeActivityID: action.payload.newActivity.id,
-        }
-      }
+      switch (action.type) {
+        case 'ADD_NEW_ACTIVITY':
+          return {
+            ...state,
+            activities: [...state.activities, action.payload.newActivity],
+            activeActivityID: action.payload.newActivity.id,
+          }
 
-      if (action.type === 'INTERRUPT_CURRENT_ACTIVITY') {
-        return {
-          ...state,
-          activities: state.activities.map((item) => {
-            if (item.id === state.activeActivityID) {
-              return { ...item, interruptedDate: new Date() }
-            } else {
-              return item
-            }
-          }),
-          activeActivityID: null,
-        }
-      }
+        case 'MARK_CURRENT_ACTIVITY_AS_FINISHED':
+          return {
+            ...state,
+            activities: state.activities.map((item) => {
+              if (item.id === state.activeActivityID) {
+                return { ...item, finishedDate: new Date() }
+              } else {
+                return item
+              }
+            }),
+            activeActivityID: null,
+          }
 
-      return state
+        case 'INTERRUPT_CURRENT_ACTIVITY':
+          return {
+            ...state,
+            activities: state.activities.map((item) => {
+              if (item.id === state.activeActivityID) {
+                return { ...item, interruptedDate: new Date() }
+              } else {
+                return item
+              }
+            }),
+            activeActivityID: null,
+          }
+
+        default:
+          return state
+      }
     },
     {
       activities: [],
@@ -77,42 +90,19 @@ export function ActivitiesContextProvider({
   const [activeActivityName, setActiveActivityName] = useState<string | null>(
     null,
   )
+  // const activeTaskName = activities.find(
+  //   (item) => item.task === activeActivityName,
+  // )
 
   const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
 
   const { activities, activeActivityID } = activitiesState
 
   const activeActivity = activities.find((item) => item.id === activeActivityID)
-  /*   const activeTaskName = activities.find(
-    (item) => item.task === activeActivityName,
-  ) */
 
-  function resetCurrentActivity() {
-    setActiveActivityID(null) // Clear action
-  }
-
-  function markCurrentActivityAsFinished() {
-    dispatch({
-      type: 'MARK_CURRENT_ACTIVITY_AS_FINISHED',
-      payload: {
-        activeActivityID,
-      },
-    })
-
-    /* setActivities((state) =>
-      state.map((item) => {
-        if (item.id === activeActivityID) {
-          return { ...item, finishedDate: new Date() }
-        } else {
-          return item
-        }
-      }),
-    ) */
-  }
-
-  function updateSecondsTimerPassed(seconds: number) {
-    setSecondsTimerPassed(seconds)
-  }
+  // function resetCurrentActivity() {
+  //   setActiveActivityID(null) // Clear action
+  // }
 
   function createNewActivity(data: CreateActivityData) {
     const newActivity: Activity = {
@@ -129,9 +119,17 @@ export function ActivitiesContextProvider({
       },
     })
 
-    // setActivities((state) => [...state, newActivity])
     setActiveActivityName(newActivity.task)
     setSecondsTimerPassed(0)
+  }
+
+  function markCurrentActivityAsFinished() {
+    dispatch({
+      type: 'MARK_CURRENT_ACTIVITY_AS_FINISHED',
+      payload: {
+        activeActivityID,
+      },
+    })
   }
 
   function interruptCurrentActivity() {
@@ -145,6 +143,10 @@ export function ActivitiesContextProvider({
     document.title = 'Pomodoro - Productivity Timer'
   }
 
+  function updateSecondsTimerPassed(seconds: number) {
+    setSecondsTimerPassed(seconds)
+  }
+
   return (
     <ActivitiesContext.Provider
       value={{
@@ -154,7 +156,6 @@ export function ActivitiesContextProvider({
         activeActivityName,
         secondsTimerPassed,
         markCurrentActivityAsFinished,
-        resetCurrentActivity,
         updateSecondsTimerPassed,
         createNewActivity,
         interruptCurrentActivity,
