@@ -1,10 +1,20 @@
-import { ReactNode, createContext, useState, useReducer } from 'react'
-import { Activity, activitiesReducer } from '../reducers/activities/reducer'
+import {
+  ReactNode,
+  createContext,
+  useState,
+  useReducer,
+  useEffect,
+} from 'react'
+import {
+  Activity,
+  activitiesReducerActions,
+} from '../reducers/activities/reducer'
 import {
   addNewActivityAction,
   interruptCurrentActivityAction,
   markCurrentActivityAsFinishedAction,
 } from '../reducers/activities/actions'
+import { differenceInSeconds } from 'date-fns'
 
 interface CreateActivityData {
   taskDescription: string
@@ -32,28 +42,44 @@ interface ActivitiesContextProviderProps {
 export function ActivitiesContextProvider({
   children,
 }: ActivitiesContextProviderProps) {
-  const [activitiesState, dispatch] = useReducer(activitiesReducer, {
-    activities: [],
-    activeActivityID: null,
-  })
+  const [activitiesState, dispatch] = useReducer(
+    activitiesReducerActions,
+    {
+      activities: [],
+      activeActivityID: null,
+    },
+    (initialState) => {
+      const storedStateAsJSON = localStorage.getItem(
+        '@productivity-timer:activities-state-v1.0',
+      )
+
+      if (storedStateAsJSON) {
+        return JSON.parse(storedStateAsJSON)
+      }
+
+      return initialState
+    },
+  )
 
   // Page Title = Duration + Activity Name
   const [activeActivityName, setActiveActivityName] = useState<string | null>(
     null,
   )
-  // const activeTaskName = activities.find(
-  //   (item) => item.task === activeActivityName,
-  // )
-
-  const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
 
   const { activities, activeActivityID } = activitiesState
-
   const activeActivity = activities.find((item) => item.id === activeActivityID)
 
-  // function resetCurrentActivity() {
-  //   setActiveActivityID(null) // Clear action
-  // }
+  const [secondsTimerPassed, setSecondsTimerPassed] = useState(() => {
+    if (activeActivity) {
+      return differenceInSeconds(new Date(), new Date(activeActivity.startDate))
+    }
+    return 0
+  })
+
+  useEffect(() => {
+    const stateJSON = JSON.stringify(activitiesState)
+    localStorage.setItem('@productivity-timer:activities-state-v1.0', stateJSON)
+  }, [activitiesState])
 
   function createNewActivity(data: CreateActivityData) {
     const newActivity: Activity = {

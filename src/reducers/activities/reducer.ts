@@ -15,7 +15,7 @@ interface activitiesReducerInterface {
   activeActivityID: string | null
 }
 
-export function activitiesReducer(
+export function activitiesReducerActions(
   state: activitiesReducerInterface,
   action: any,
 ) {

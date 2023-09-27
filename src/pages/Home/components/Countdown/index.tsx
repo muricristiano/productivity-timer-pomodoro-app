@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect } from 'react'
 import { CountdownContainer, Separator } from './styles'
 import { differenceInSeconds } from 'date-fns'
 import { ActivitiesContext } from '../../../../contexts/ActivitiesContext'
@@ -9,7 +9,6 @@ export function Countdown() {
     activeActivityID,
     activeActivityName,
     markCurrentActivityAsFinished,
-    resetCurrentActivity,
     secondsTimerPassed,
     updateSecondsTimerPassed,
   } = useContext(ActivitiesContext)
@@ -42,7 +41,7 @@ export function Countdown() {
       interval = setInterval(() => {
         const differenceTime = differenceInSeconds(
           new Date(),
-          activeActivity.startDate,
+          new Date(activeActivity.startDate), // LocalStorage Date String handling (Converts to data if it is a string)
         )
 
         if (differenceTime >= totalActivitySeconds) {
@@ -50,7 +49,6 @@ export function Countdown() {
           updateSecondsTimerPassed(totalActivitySeconds)
           clearInterval(interval)
           document.title = `Success! - ${activeActivityName}`
-          resetCurrentActivity()
         } else {
           updateSecondsTimerPassed(differenceTime)
         }
@@ -66,7 +64,6 @@ export function Countdown() {
     activeActivityID,
     activeActivityName,
     markCurrentActivityAsFinished,
-    resetCurrentActivity,
     updateSecondsTimerPassed,
   ])
 
