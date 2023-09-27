@@ -1,9 +1,10 @@
 import { ReactNode, createContext, useState, useReducer } from 'react'
+import { Activity, activitiesReducer } from '../reducers/activities/reducer'
 import {
-  ActionTypes,
-  Activity,
-  activitiesReducer,
-} from '../reducers/activities'
+  addNewActivityAction,
+  interruptCurrentActivityAction,
+  markCurrentActivityAsFinishedAction,
+} from '../reducers/activities/actions'
 
 interface CreateActivityData {
   taskDescription: string
@@ -62,34 +63,18 @@ export function ActivitiesContextProvider({
       startDate: new Date(),
     }
 
-    dispatch({
-      type: ActionTypes.ADD_NEW_ACTIVITY,
-      payload: {
-        newActivity,
-      },
-    })
+    dispatch(addNewActivityAction(newActivity))
 
     setActiveActivityName(newActivity.task)
     setSecondsTimerPassed(0)
   }
 
   function markCurrentActivityAsFinished() {
-    dispatch({
-      type: ActionTypes.MARK_CURRENT_ACTIVITY_AS_FINISHED,
-      payload: {
-        activeActivityID,
-      },
-    })
+    dispatch(markCurrentActivityAsFinishedAction())
   }
 
   function interruptCurrentActivity() {
-    dispatch({
-      type: ActionTypes.INTERRUPT_CURRENT_ACTIVITY,
-      payload: {
-        activeActivityID,
-      },
-    })
-
+    dispatch(interruptCurrentActivityAction())
     document.title = 'Pomodoro - Productivity Timer'
   }
 
