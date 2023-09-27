@@ -28,7 +28,7 @@ export function History() {
                   <td>{activity.task}</td>
                   <td>{activity.duration} minutes</td>
                   <td>
-                    {formatDistanceToNow(activity.startDate, {
+                    {formatDistanceToNow(new Date(activity.startDate), {
                       addSuffix: true,
                     })}
                   </td>
