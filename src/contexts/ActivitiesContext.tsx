@@ -61,13 +61,18 @@ export function ActivitiesContextProvider({
     },
   )
 
-  // Page Title = Duration + Activity Name
-  const [activeActivityName, setActiveActivityName] = useState<string | null>(
-    null,
-  )
-
   const { activities, activeActivityID } = activitiesState
   const activeActivity = activities.find((item) => item.id === activeActivityID)
+
+  // Page Title = Duration + Activity Name
+  const [activeActivityName, setActiveActivityName] = useState<string | null>(
+    () => {
+      if (activeActivity) {
+        return activeActivity.task
+      }
+      return ''
+    },
+  )
 
   const [secondsTimerPassed, setSecondsTimerPassed] = useState(() => {
     if (activeActivity) {
