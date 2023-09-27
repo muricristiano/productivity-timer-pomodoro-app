@@ -1,17 +1,13 @@
 import { ReactNode, createContext, useState, useReducer } from 'react'
+import {
+  ActionTypes,
+  Activity,
+  activitiesReducer,
+} from '../reducers/activities'
 
 interface CreateActivityData {
   taskDescription: string
   timeAmount: number
-}
-
-interface Activity {
-  id: string
-  task: string
-  duration: number
-  startDate: Date
-  interruptedDate?: Date
-  finishedDate?: Date
 }
 
 interface ActivitiesContextType {
@@ -32,59 +28,13 @@ interface ActivitiesContextProviderProps {
   children: ReactNode
 }
 
-interface activitiesReducer {
-  activities: Activity[]
-  activeActivityID: string | null
-}
-
 export function ActivitiesContextProvider({
   children,
 }: ActivitiesContextProviderProps) {
-  const [activitiesState, dispatch] = useReducer(
-    (state: activitiesReducer, action: any) => {
-      switch (action.type) {
-        case 'ADD_NEW_ACTIVITY':
-          return {
-            ...state,
-            activities: [...state.activities, action.payload.newActivity],
-            activeActivityID: action.payload.newActivity.id,
-          }
-
-        case 'MARK_CURRENT_ACTIVITY_AS_FINISHED':
-          return {
-            ...state,
-            activities: state.activities.map((item) => {
-              if (item.id === state.activeActivityID) {
-                return { ...item, finishedDate: new Date() }
-              } else {
-                return item
-              }
-            }),
-            activeActivityID: null,
-          }
-
-        case 'INTERRUPT_CURRENT_ACTIVITY':
-          return {
-            ...state,
-            activities: state.activities.map((item) => {
-              if (item.id === state.activeActivityID) {
-                return { ...item, interruptedDate: new Date() }
-              } else {
-                return item
-              }
-            }),
-            activeActivityID: null,
-          }
-
-        default:
-          return state
-      }
-    },
-    {
-      activities: [],
-      activeActivityID: null,
-    },
-  )
+  const [activitiesState, dispatch] = useReducer(activitiesReducer, {
+    activities: [],
+    activeActivityID: null,
+  })
 
   // Page Title = Duration + Activity Name
   const [activeActivityName, setActiveActivityName] = useState<string | null>(
@@ -113,7 +63,7 @@ export function ActivitiesContextProvider({
     }
 
     dispatch({
-      type: 'ADD_NEW_ACTIVITY',
+      type: ActionTypes.ADD_NEW_ACTIVITY,
       payload: {
         newActivity,
       },
@@ -125,7 +75,7 @@ export function ActivitiesContextProvider({
 
   function markCurrentActivityAsFinished() {
     dispatch({
-      type: 'MARK_CURRENT_ACTIVITY_AS_FINISHED',
+      type: ActionTypes.MARK_CURRENT_ACTIVITY_AS_FINISHED,
       payload: {
         activeActivityID,
       },
@@ -134,7 +84,7 @@ export function ActivitiesContextProvider({
 
   function interruptCurrentActivity() {
     dispatch({
-      type: 'INTERRUPT_CURRENT_ACTIVITY',
+      type: ActionTypes.INTERRUPT_CURRENT_ACTIVITY,
       payload: {
         activeActivityID,
       },
