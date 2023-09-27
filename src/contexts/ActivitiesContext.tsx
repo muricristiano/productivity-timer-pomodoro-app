@@ -33,21 +33,45 @@ interface ActivitiesContextProviderProps {
   children: ReactNode
 }
 
+interface activitiesReducer {
+  activities: Activity[]
+  activeActivityID: string | null
+}
+
 export function ActivitiesContextProvider({
   children,
 }: ActivitiesContextProviderProps) {
-  const [activities, dispatch] = useReducer(
-    (state: Activity[], action: any) => {
+  const [activitiesState, dispatch] = useReducer(
+    (state: activitiesReducer, action: any) => {
       if (action.type === 'ADD_NEW_ACTIVITY') {
-        return [...state, action.payload.newActivity]
+        return {
+          ...state,
+          activities: [...state.activities, action.payload.newActivity],
+          activeActivityID: action.payload.newActivity.id,
+        }
+      }
+
+      if (action.type === 'INTERRUPT_CURRENT_ACTIVITY') {
+        return {
+          ...state,
+          activities: state.activities.map((item) => {
+            if (item.id === state.activeActivityID) {
+              return { ...item, interruptedDate: new Date() }
+            } else {
+              return item
+            }
+          }),
+          activeActivityID: null,
+        }
       }
 
       return state
     },
-    [],
+    {
+      activities: [],
+      activeActivityID: null,
+    },
   )
-
-  const [activeActivityID, setActiveActivityID] = useState<string | null>(null)
 
   // Page Title = Duration + Activity Name
   const [activeActivityName, setActiveActivityName] = useState<string | null>(
@@ -55,6 +79,8 @@ export function ActivitiesContextProvider({
   )
 
   const [secondsTimerPassed, setSecondsTimerPassed] = useState(0)
+
+  const { activities, activeActivityID } = activitiesState
 
   const activeActivity = activities.find((item) => item.id === activeActivityID)
   /*   const activeTaskName = activities.find(
@@ -104,7 +130,6 @@ export function ActivitiesContextProvider({
     })
 
     // setActivities((state) => [...state, newActivity])
-    setActiveActivityID(newActivity.id)
     setActiveActivityName(newActivity.task)
     setSecondsTimerPassed(0)
   }
@@ -117,18 +142,6 @@ export function ActivitiesContextProvider({
       },
     })
 
-    /*     setActivities((state) =>
-      state.map((item) => {
-        if (item.id === activeActivityID) {
-          return { ...item, interruptedDate: new Date() }
-        } else {
-          return item
-        }
-      }),
-    )
-    */
-
-    setActiveActivityID(null) // Clear action
     document.title = 'Pomodoro - Productivity Timer'
   }
 
