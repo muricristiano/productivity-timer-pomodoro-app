@@ -7,11 +7,18 @@ export const HomeContainer = styled.main`
   justify-content: center;
   align-items: center;
 
+  margin-top: -4rem;
+
   form {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 3.5rem;
+  }
+
+  h1 {
+    font-size: 3rem;
+    color: ${(props) => props.theme['red-medium']};
   }
 `
 

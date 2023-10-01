@@ -49,9 +49,13 @@ export function Home() {
     <HomeContainer>
       {/* A function => to => execute a function // This is like registering the function/event */}
       <form onSubmit={handleSubmit(handleCreateNewActivity)}>
-        <FormProvider {...newActivityForm}>
-          <NewActivityForm />
-        </FormProvider>
+        {!activeActivity ? (
+          <FormProvider {...newActivityForm}>
+            <NewActivityForm />
+          </FormProvider>
+        ) : (
+          <h1 className="activityTitle">{activeActivity.task}</h1>
+        )}
         <Countdown />
         {activeActivity ? (
           <StopCountdownButton type="button" onClick={interruptCurrentActivity}>
