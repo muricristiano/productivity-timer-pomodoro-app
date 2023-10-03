@@ -2,6 +2,7 @@ import { useContext, useEffect } from 'react'
 import { CountdownContainer, Separator } from './styles'
 import { differenceInSeconds } from 'date-fns'
 import { ActivitiesContext } from '../../../../contexts/ActivitiesContext'
+import bellAudio from '../../../../assets/bell.mp3'
 
 export function Countdown() {
   const {
@@ -49,6 +50,9 @@ export function Countdown() {
           updateSecondsTimerPassed(totalActivitySeconds)
           clearInterval(interval)
           document.title = `Success! - ${activeActivityName}`
+
+          const audio = new Audio(bellAudio)
+          audio.play()
         } else {
           updateSecondsTimerPassed(differenceTime)
         }
